@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { getAuth } from "firebase/auth";
 import { TextField, Button, Grid, Card, CardMedia, CardContent, Typography } from "@mui/material";
-import { searchVideos } from "../../api/youtube"; // Función para buscar videos en la API de YouTube
-import { addFavorite } from "../../utils/favorites"; // Función para agregar videos a favoritos
+import { searchVideos } from "../../api/youtube";
+import { addFavorite } from "../../utils/favorites";
 
 const VideoList = () => {
-  const [query, setQuery] = useState(""); // Estado para el término de búsqueda
-  const [videos, setVideos] = useState([]); // Estado para los videos obtenidos de la API
+  const [query, setQuery] = useState("");
+  const [videos, setVideos] = useState([]);
   const auth = getAuth();
-  const user = auth.currentUser; // Usuario autenticado actual
+  const user = auth.currentUser;
 
   // Función para buscar videos
   const handleSearch = async () => {
@@ -26,7 +26,11 @@ const VideoList = () => {
       alert("Debes iniciar sesión para guardar videos en favoritos.");
       return;
     }
-    addFavorite(video);
+    if (!video || !video.id || !video.id.videoId) {
+      alert("El video no tiene un ID válido.");
+      return;
+    }
+    addFavorite(user.uid, video);
     alert("Video agregado a favoritos");
   };
 
@@ -47,22 +51,21 @@ const VideoList = () => {
         Buscar
       </Button>
 
-      {/* Contenedor de videos */}
       <Grid
         container
-        spacing={3} // Espaciado entre los elementos
+        spacing={3}
         sx={{
           marginTop: 2,
-          justifyContent: { xs: "flex-start", sm: "center" }, // Alineación responsiva
+          justifyContent: { xs: "flex-start", sm: "center" },
         }}
       >
         {videos.map((video) => (
           <Grid
             item
-            xs={12} // En móviles, ocupa toda la fila
-            sm={6}  // En tablets, dos columnas
-            md={4}  // En pantallas medianas, tres columnas
-            lg={3}  // En pantallas grandes, cuatro columnas
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
             key={video.id.videoId}
           >
             <Card
@@ -78,8 +81,8 @@ const VideoList = () => {
                 image={video.snippet.thumbnails.medium.url}
                 alt={video.snippet.title}
                 sx={{
-                  width: "100%", // Asegura que la imagen ocupe todo el ancho del contenedor
-                  height: "auto", // Mantiene la proporción de la imagen
+                  width: "100%",
+                  height: "auto",
                 }}
               />
               <CardContent>
@@ -95,9 +98,9 @@ const VideoList = () => {
                   onClick={() => handleAddFavorite(video)}
                   sx={{
                     marginTop: 1,
-                    display: "block", // Asegura que el botón sea un bloque
-                    marginLeft: "auto", // Centra el botón horizontalmente
-                    marginRight: "auto", // Centra el botón horizontalmente
+                    display: "block",
+                    marginLeft: "auto",
+                    marginRight: "auto",
                   }}
                 >
                   Agregar a favoritos
@@ -111,4 +114,4 @@ const VideoList = () => {
   );
 };
 
-export default VideoList;
+export default VideoList; 

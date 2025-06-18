@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { getFavorites, removeFavorite } from "../../utils/favorites"; // Funciones para manejar favoritos
+import { getFavorites, removeFavorite } from "../../utils/favorites";
 import { Grid, Card, CardMedia, CardContent, Typography, Button } from "@mui/material";
+import { getAuth } from "firebase/auth";
 
-const Favorites = () => {
+const Favorites = ({ logoutSignal }) => {
   const [favorites, setFavorites] = useState([]);
+  const auth = getAuth();
+  const user = auth.currentUser;
 
-  // Cargar los favoritos al montar el componente
+  // Cargar favoritos cuando cambia el usuario o la señal de logout
   useEffect(() => {
-    setFavorites(getFavorites());
-  }, []);
+    if (user) {
+      setFavorites(getFavorites(user.uid));
+    } else {
+      setFavorites([]);
+    }
+    // eslint-disable-next-line
+  }, [user, logoutSignal]);
 
-  // Función para eliminar un video de favoritos
+  // Eliminar un video de favoritos
   const handleRemoveFavorite = (videoId) => {
-    removeFavorite(videoId);
-    setFavorites(getFavorites());
+    if (!user) return;
+    removeFavorite(user.uid, videoId);
+    setFavorites(getFavorites(user.uid));
     alert("Video eliminado de favoritos");
   };
 
@@ -31,8 +40,8 @@ const Favorites = () => {
                 image={video.snippet.thumbnails.medium.url}
                 alt={video.snippet.title}
                 sx={{
-                  width: "100%", // Asegura que la imagen ocupe todo el ancho del contenedor
-                  height: "auto", // Mantiene la proporción de la imagen
+                  width: "100%",
+                  height: "auto",
                 }}
               />
               <CardContent>
