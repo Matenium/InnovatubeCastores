@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { getFavorites, removeFavorite } from "../../utils/favorites";
-import { Grid, Card, CardMedia, CardContent, Typography, Button } from "@mui/material";
+import { Grid, Card, CardMedia, CardContent, Typography, Button, TextField } from "@mui/material";
 import { getAuth } from "firebase/auth";
 
 const Favorites = ({ logoutSignal }) => {
   const [favorites, setFavorites] = useState([]);
+  const [search, setSearch] = useState("");
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -26,13 +27,26 @@ const Favorites = ({ logoutSignal }) => {
     alert("Video eliminado de favoritos");
   };
 
+  // Filtrar favoritos por búsqueda (por título)
+  const filteredFavorites = favorites.filter((video) =>
+    video.snippet.title.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div>
       <Typography variant="h4" sx={{ marginBottom: 2 }}>
         Mis Favoritos
       </Typography>
+      <TextField
+        label="Buscar en favoritos"
+        variant="outlined"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        fullWidth
+        sx={{ marginBottom: 2 }}
+      />
       <Grid container spacing={2}>
-        {favorites.map((video) => (
+        {filteredFavorites.map((video) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={video.id.videoId}>
             <Card sx={{ height: "100%" }}>
               <CardMedia
@@ -64,6 +78,11 @@ const Favorites = ({ logoutSignal }) => {
           </Grid>
         ))}
       </Grid>
+      {filteredFavorites.length === 0 && (
+        <Typography variant="body1" sx={{ marginTop: 2 }}>
+          No se encontraron favoritos con ese título.
+        </Typography>
+      )}
     </div>
   );
 };
