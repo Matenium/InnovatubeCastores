@@ -9,26 +9,26 @@ import ForgotPassword from "./components/Auth/ForgotPassword";
 import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 
 const App = () => {
-  const [user, setUser] = useState(null); // Estado para almacenar el usuario autenticado
+  const [user, setUser] = useState(null);
+  const [logoutSignal, setLogoutSignal] = useState(false); // NUEVO: señal para limpiar favoritos
   const auth = getAuth();
 
-  // Escuchar cambios en el estado de autenticación
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // Actualiza el estado con el usuario actual
+      setUser(currentUser);
     });
-
-    return () => unsubscribe(); // Limpia el listener al desmontar el componente
+    return () => unsubscribe();
   }, [auth]);
 
   const handleLogout = () => {
     auth.signOut();
+    localStorage.removeItem("favorites");
+    setLogoutSignal((prev) => !prev); // NUEVO: cambia la señal para limpiar favoritos
     alert("Sesión cerrada");
   };
 
   return (
     <Router>
-      {/* Barra de navegación */}
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -51,9 +51,7 @@ const App = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Contenido principal */}
       <Box sx={{ padding: "20px" }}>
-        {/* Mostrar el texto de bienvenida si el usuario está autenticado */}
         {user && (
           <Typography variant="h6" sx={{ marginBottom: 2 }}>
             Bienvenido: {user.email}
@@ -62,7 +60,7 @@ const App = () => {
 
         <Routes>
           <Route path="/" element={<VideoList />} />
-          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/favorites" element={<Favorites logoutSignal={logoutSignal} />} /> {/* PASA LA SEÑAL */}
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

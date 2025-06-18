@@ -55,7 +55,7 @@ const Register = () => {
       localStorage.setItem("users", JSON.stringify(users));
 
       alert("Usuario registrado con éxito");
-      navigate("/login"); // Redirige a la pantalla de inicio de sesión
+      navigate("/"); // Redirige a la pantalla de inicio de sesión
     } catch (error) {
       alert(error.message);
     }
